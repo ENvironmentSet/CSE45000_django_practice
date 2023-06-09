@@ -4,10 +4,17 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .forms import PostForm
 from rest_framework import viewsets
 from .serializers import PostSerializer
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 class IntruderImage(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user) 
 
 def post_list(request):
     posts = Post.objects.filter(published_date__lte = timezone.now()).order_by('published_date')
